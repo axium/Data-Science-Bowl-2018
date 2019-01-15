@@ -40,7 +40,7 @@ def load_train(train_path, size=None, return_mask_report=True):
         del images[idx]
         del masks[idx]
         del masks_obj[idx]
-#    # converting to numpy array if all images have same sizes
+    # converting to numpy array if all images have same sizes
     if size is not None:
         masks  = np.array(masks)
         images = np.array(images)

@@ -3,9 +3,10 @@ import matplotlib.pyplot as plt
 from dataloader import DataLoader
 from models import *
 from trainer import Trainer
+from utils import iou_score
 
 # constants
-model_name = "unet" # "unet" or "unet-kmeans"
+model_name = "unet-kmeans" # "unet" or "unet-kmeans"
 augmentor  = True
 n_clusters = [2,3,5,7]
 kmean_reduction_size = (64,64)
@@ -21,7 +22,7 @@ iterations = 10000
 resolution = (256,256)
 val_size   = 0.3
 save_test  = False
-n_show     = 10
+n_show     = 2
 threshold  = 0.5
 
 # loading dataset
@@ -56,23 +57,37 @@ if mode=="eval":
     x_val,y_val = dataloader.get_val()
     y_prob      = model.predict(x_val, batch_size=16)
     y_pred      = np.where(y_prob > threshold, 1,0)
+    # shows validation images 
     indices     = np.random.permutation(len(y_pred))[:n_show]
-    n_rows      = len(indices); n_cols = (x_val.shape[-1] - 2) + 3 
+    n_rows      = len(indices); n_cols = (x_val.shape[-1] - 2) + 3
+    plt.figure()
     for i,idx in enumerate(indices):
         j=1
         plt.subplot(n_rows,n_cols,n_cols*i+j); j+=1
-        plt.imshow(x_val[idx,:,:,:3]); plt.title("test")
+        plt.imshow(x_val[idx,:,:,:3]); plt.title("test"); plt.axis("Off")
         if model_name == "unet-kmeans":
             for k in range(len(n_clusters)):
                 plt.subplot(n_rows,n_cols,n_cols*i+j); j+=1 
-                plt.imshow(x_val[idx,:,:,k+3])
+                plt.imshow(x_val[idx,:,:,k+3]); plt.axis("Off")
                 plt.title("kmeans:k=%d"%n_clusters[k])
         plt.subplot(n_rows,n_cols,n_cols*i+j); j+=1
-        plt.imshow((y_prob[idx,:,:,0]*255).astype("uint8")); plt.title("probability")
+        plt.imshow((y_prob[idx,:,:,0]*255).astype("uint8")); plt.title("probability"); plt.axis("Off")       
         plt.subplot(n_rows,n_cols,n_cols*i+j); j+=1
-        plt.imshow(y_pred[idx,:,:,0]); plt.title("predicted")
+        plt.imshow(y_pred[idx,:,:,0]); plt.title("predicted"); plt.axis("Off")
         plt.subplot(n_rows,n_cols,n_cols*i+j); j+=1
-        plt.imshow(y_val[idx,:,:,0]); plt.title("mask")
+        plt.imshow(y_val[idx,:,:,0]); plt.title("mask"); plt.axis("Off")
+    # plotting iou vs threshold
+    thrs = np.arange(0.1,0.95,0.05)
+    iou  = []
+    for thr in thrs:
+        y_pred_thr  = np.where(y_prob > thr, 1,0)
+        score       = iou_score(y_val, y_pred_thr)
+        iou.append(score)
+    plt.figure()
+    plt.plot(thrs, iou)
+    plt.title("iou vs threshold")
+    plt.show()
+
     
     
     

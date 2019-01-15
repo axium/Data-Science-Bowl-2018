@@ -1,3 +1,5 @@
+import numpy as np
+import cv2
 
 
 
@@ -25,3 +27,14 @@ def watershed(img):
     markers = cv2.watershed(img,markers)
     img[markers == -1] = [255,0,0]
     return markers
+
+
+
+def iou_score(y_true,y_pred):
+    iou = []
+    for y1,y2 in zip(y_true, y_pred):
+        intersection = y1 * y2
+        union        = np.where(y1 + y2 >= 1,1,0)
+        score        = np.sum(intersection) / np.sum(union)
+        iou.append(score)
+        return np.mean(iou)
