@@ -1,5 +1,5 @@
 import numpy as np
-from keras.layers import Conv2D, BatchNormalization, LeakyReLU, Dropout, Input, MaxPooling2D, Conv2DTranspose
+from keras.layers import Conv2D, BatchNormalization, LeakyReLU, Dropout, Input, MaxPooling2D, Conv2DTranspose,Lambda
 from keras.layers import Concatenate
 from keras.models import Model
 from keras.optimizers import SGD, Adam

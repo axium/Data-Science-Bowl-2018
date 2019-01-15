@@ -102,7 +102,10 @@ def augmenter(images, masks, fliplr, flipud, rot, rot_mode, rot90):
     return np.array(aug_images), np.array(aug_masks)
 
 # perform k-means segmentation on images
-def kmeans_segmentor(images, n_clusters, return_np = True, n_jobs = -1 ):
+def kmeans_segmentor(images, n_clusters, return_np = True, n_jobs = -1, reduce_size = None, ):
+    if reduce_size is not None:
+        s = images.shape[1] # orig size 
+        images = np.array([resize(img,(reduce_size[0],reduce_size[1],3),mode="constant",preserve_range=True,anti_aliasing=True) for img in images])
     Cluster = []
     for image in tqdm(images, desc="generating cluster maps"):
         cluster = []
@@ -127,6 +130,9 @@ def kmeans_segmentor(images, n_clusters, return_np = True, n_jobs = -1 ):
         cluster = np.array(cluster).transpose([1,2,0])
 #        cluster = np.expand_dims(cluster, axis=-1)
         Cluster.append(cluster)
+
+    if reduce_size is not None:
+        Cluster = [resize(c, (s,s), mode="constant",order=0,anti_aliasing=False,preserve_range=True) for c in Cluster]
     if return_np:
         return np.array(Cluster)
     else:
@@ -163,15 +169,15 @@ class DataLoader():
         self.n_val   = len(self.idx_val)
         
         
-    def kmeans_cluster(self, n_clusters=[2,3,5,7], data="train"):
+    def kmeans_cluster(self, n_clusters=[2,3,5,7], data="train",reduce_size=None):
         '''
         a function to generate cluster maps using k-means.
         '''
         self.kmeans = True
         if data=="train":
-            self.cluster_maps = kmeans_segmentor(self.images, n_clusters)
+            self.cluster_maps = kmeans_segmentor(self.images, n_clusters, reduce_size=reduce_size)
         if data=="test":
-            self.cluster_maps_test = kmeans_segmentor(self.test_images, n_clusters)
+            self.cluster_maps_test = kmeans_segmentor(self.test_images, n_clusters, reduce_size=reduce_size)
     
         
     def load_testing(self):
