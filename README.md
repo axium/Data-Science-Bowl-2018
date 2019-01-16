@@ -31,5 +31,11 @@ To start training, simply run `main.py` file. All parameters are made available 
 
 1. `dataloader.py` -- loads the data, provides batches for training with augmentation enabled, generates k-means cluster maps. 
 2. `model.py` -- provides functions that return unet models for approach 1 and 2.
-3. `trainer.py` -- when passed a dataloader object and model, it will train it with proper logging for training and validation to tensorboard.
+3. `trainer.py` -- when passed a dataloader object and model, it will train it with proper logging for training and validation to tensorboard (shown below).
 4. `main.py` -- main file to run.
+
+
+
+**Tensorboard**
+
+![tensorboard](./images/tensorboard.png)
